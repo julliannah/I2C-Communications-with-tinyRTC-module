@@ -9,14 +9,57 @@ enum {
     GPIO_BASE    = 0x7F200000,
     // GPPUD        = (GPIO_BASE + 0x94),
     // GPPUDCLK0    = (GPIO_BASE + 0x98),
-    SPI0_BASE    = (GPIO_BASE + 0x4000), // SPI Master Base address
-    SPI0_CS      = (SPI0_BASE + 0x00),   // Control and Status
-    SPI0_FIFO    = (SPI0_BASE + 0x04),   // TX and RX FIFOs
-    SPI0_CLK     = (SPI0_BASE + 0x08),   // Clock Divider
-    SPI0_DLEN    = (SPI0_BASE + 0x0C),   // Data Length
-    SPI0_LTOH    = (SPI0_BASE + 0x10),   // SPI LOSSI mode TOH
-    SPI0_DC      = (SPI0_BASE + 0x14),   // SPI DMA DREQ Controls
+    BSC0_BASE    = (GPIO_BASE + 0x5000), // BSC Master Base address
+    BSC0_C       = (BSC0_BASE + 0x00),   // Control
+    BSC0_S       = (BSC0_BASE + 0x04),   // Status
+    BSC0_DLEN    = (BSC0_BASE + 0x08),   // Data Length
+    BSC0_A       = (BSC0_BASE + 0x0C),   // Slave Address
+    BSC0_FIFO    = (BSC0_BASE + 0x10),   // Data FIFO
+    BSC0_DIV     = (BSC0_BASE + 0x14),   // Clock Divide
+    BSC0_DEL     = (BSC0_BASE + 0x18),   // Data Delay
+    BSC0_CLKT    = (BSC0_BASE + 0x1C),   // Clock Stretch Timeout
+
 };
+
+// typedef union uart_flags
+// {
+//     struct
+//     {
+//         uint8_t clear_to_send : 1;
+//         uint8_t data_set_ready : 1;
+//         uint8_t data_carrier_detected : 1;
+//         uint8_t busy : 1;
+//         uint8_t receive_queue_empty : 1;
+//         uint8_t transmit_queue_full : 1;
+//         uint8_t receive_queue_full : 1;
+//         uint8_t transmit_queue_empty : 1;
+//         uint8_t ring_indicator : 1;
+//         uint32_t padding : 23;
+//     };
+//     uint32_t as_int;
+// } uart_flags_t;
+
+typedef union master_control
+{
+    struct
+    {
+        uint8_t transmit_read : 1;
+        uint8_t fifo_clear : 2;
+        uint8_t transmit_start : 1;
+        uint8_t transmit_start : 1;
+        uint8_t transmit_start : 1;
+        uint8_t done_interrupt : 1;
+        uint8_t transmit_interrupt : 1;
+        uint8_t receive_interrupt : 1;
+        uint8_t master_enabled : 1 ;
+        // uint8_t sir_enabled : 1;
+        // uint8_t sir_low_power_mode : 1;
+        // uint8_t reserved : 4;
+        // uint8_t loop_back_enabled : 1;
+    };
+    uint32_t as_int;
+     
+} master_control_t;
 
 // Adress map of Slave
 enum
@@ -43,7 +86,7 @@ enum
     I2C_SPI_SLV_DEBUG2   = (I2C_SPI_SLV_BASE + 0x3C),  // SPI Debug Register
 } ;
 
-typedef union uart_flags
+typedef union slave_flags
 {
     struct
     {
@@ -61,28 +104,28 @@ typedef union uart_flags
     uint32_t as_int;
 } uart_flags_t;
 
-typedef union uart_control
+typedef union slave_control
 {
     struct
     {
-        uint8_t uart_enabled : 1 ;
-        uint8_t sir_enabled : 1;
-        uint8_t sir_low_power_mode : 1;
-        uint8_t reserved : 4;
-        uint8_t loop_back_enabled : 1;
+        uint8_t slave_enabled : 1 ;
+        uint8_t spi_mode : 1;
+        uint8_t i2c_mode : 1;
+        uint8_t clock_phase : 1;
+        uint8_t clock_polarity : 1;
+        uint8_t status_enabled : 1;
+        uint8_t control_enabled : 1;
+        uint8_t break_current : 1;
         uint8_t transmit_enabled : 1;
         uint8_t receive_enabled : 1;
-        uint8_t data_transmit_ready : 1;
-        uint8_t request_to_send : 1;
-        uint8_t out1 : 1;
-        uint8_t out2 : 1;
-        uint8_t rts_hardware_flow_control_enabled : 1;
-        uint8_t cts_hardware_flow_control_enabled : 1;
-        uint16_t padding;
+        uint8_t inverse_rx_flags : 1;
+        uint8_t fifo_enabled : 1;
+        uint8_t host_control_enabled : 1;
+        uint8_t inverse_tx_flags : 1;
     };
     uint32_t as_int;
      
-} uart_control_t;
+} slave_control_t;
 
 void mmio_write(uint32_t reg, uint32_t data);   
 uint32_t mmio_read(uint32_t reg);               // read content to a memory location
